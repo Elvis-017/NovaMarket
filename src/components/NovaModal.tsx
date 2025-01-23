@@ -1,0 +1,31 @@
+import { Modal } from 'bootstrap'
+
+export type ModalProps = {
+    title?: string,
+    modalBody?: JSX.Element
+    id?:string,
+}
+
+export const NovaModal = ({
+    title = 'modal',
+    modalBody = <></>,
+    id=""
+
+}: ModalProps) => {
+    return (
+        <div className="modal fade" id={id} tabIndex={-1} aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div className="modal-dialog">
+                <div className="modal-content">
+                    <div className="modal-header bg-dark text-white">
+                        <h1 className="modal-title fs-5" id="exampleModalLabel">{title}</h1>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div className="modal-body">
+                        {modalBody}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    )
+}
