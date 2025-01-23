@@ -8,9 +8,6 @@ export const cleanFields = () => {
 
         element.classList.remove("is-invalid");
     }
-
-   const idFormValue = win.getElementById("productid")
-   idFormValue.value = ""
 };
 
 export  const checkRequiredField = () => {

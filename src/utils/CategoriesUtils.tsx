@@ -1,14 +1,14 @@
 import { NovaButton } from "../components/NovaButton";
-import { productsMD } from "../interfaces/productsMD";
 import BaseUrl from "./BaseURL";
 import NovaNotification from "./NovaNotification";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 import { changeFamiliarTitle } from "./ModalUtils";
 import { getShownRowData } from "./DataTable";
+import { categoriesMD } from "../interfaces/categoriesMD";
 
-export const getProductsCustomRows = async () => {
-    return await new BaseUrl().getData("Products/getProducts")
+export const getCategoriesCustomRows = async () => {
+    return await new BaseUrl().getData("Categories/getCategories")
         .then((responds: any) => {
 
             try {
@@ -16,31 +16,27 @@ export const getProductsCustomRows = async () => {
                     data = JSON.parse(stringy),
                     rows: Array<any> = [];
 
-                data.map((obj: productsMD) => {
+                data.map((obj: categoriesMD) => {
                     let props = {
                         id: obj.id,
-                        name: obj.name,
-                        categoryid: obj.categoryId,
-                        categoryname: obj.categoryName,
+                        name: obj.name
                     }
 
                     rows.push({
                         name: props.name,
-                        categoryName: props.categoryname,
                         action: <div style={{ display: 'flex', justifyContent: 'center' }}>
                             <NovaButton
                                 datasets={{
                                     id: props.id,
                                     name: props.name,
-                                    categoryid: props.categoryid,
                                 }}
                                 onClick={(e: any)=>{
                                     getShownRowData(e); 
-                                    changeFamiliarTitle("Edit Products", "product-modal");
+                                    changeFamiliarTitle("Edit Category", "category-modal");
                                 }
                                 }
                                 type="button"
-                                dataTarget={"#product-modal"}
+                                dataTarget={"#category-modal"}
                                 className={`btn btn-warning m-1 btn-sm`}
                                 icon={<MdEdit />}
                             />

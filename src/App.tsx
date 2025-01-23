@@ -1,6 +1,7 @@
 import { NovaRoutes } from "./utils/NovaRoutes"
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
+import { ToastContainer } from "react-toastify";
 
 function App() {
 
@@ -36,6 +37,8 @@ function App() {
 
 
       </div>
+
+      <ToastContainer />
     </>
   )
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 export type NovaButtonProps = {
   className?: string;
@@ -10,10 +10,12 @@ export type NovaButtonProps = {
   form?: string;
   datasets?: Record<string, any>;
   type?: string;
-  buttonText?: string | undefined;
+  buttonText?: string | undefined | JSX.Element;
+  icon?: ReactNode;
 };
 
 export const NovaButton = ({
+  icon,
   className = '',
   id = '',
   onClick = () => {},
@@ -23,16 +25,16 @@ export const NovaButton = ({
   form = '',
   datasets = {},
   type = '',
-  buttonText = 'Button',
+  buttonText = ''
 }: NovaButtonProps) => {
 
-    const getDatasets = Object.entries(datasets).map(([key, value])=>{
-            return {[`data-${key}`] : value}
-    })
+  const getDatasets = Object.entries(datasets).map(([key, value])=>{
+    return {[`data-${key}`] : value}
+  })
 
   return (
     <button
-      className={`btn bg-dark text-white ${className}`}
+      className={`btn text-white ${className}`}
       id={id}
       onClick={onClick}
       style={style}
@@ -44,7 +46,7 @@ export const NovaButton = ({
       form={form}
       {...Object.assign({}, ...getDatasets)}
     >
-      {buttonText}
+     {icon} {buttonText}
     </button>
   );
 };

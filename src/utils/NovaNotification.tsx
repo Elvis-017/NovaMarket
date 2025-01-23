@@ -28,6 +28,4 @@ export default class NovaNotification {
   errorNotification = () => toast.error(this.message, this.configProperties);
 
   warningNotification = () => toast.warning(this.message, this.configProperties);
-
-  infoNotification = () => toast.info(this.message, this.configProperties);
 }

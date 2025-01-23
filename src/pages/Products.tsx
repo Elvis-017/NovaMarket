@@ -7,6 +7,8 @@ import { categoriesMD } from '../interfaces/categoriesMD'
 import NovaNotification from '../utils/NovaNotification'
 import { productsMD } from '../interfaces/productsMD'
 import DataTable from 'react-data-table-component'
+import {  getProductsCustomRows } from '../utils/ProducsUtils'
+import { changeFamiliarTitle } from '../utils/ModalUtils'
 
 const Products = () => {
 
@@ -24,6 +26,7 @@ const Products = () => {
   const [products, setProducts] = useState<Array<productsMD>>([]);
 
   useEffect(() => {
+
     new BaseUrl().getData("Categories/getCategories")
       .then((responds: categoriesMD) => {
         try {
@@ -36,18 +39,13 @@ const Products = () => {
         }
       })
 
-    new BaseUrl().getData("Products/getProducts")
-      .then((responds: categoriesMD) => {
-        try {
-          const stringy = JSON.stringify(responds);
-          const result = JSON.parse(stringy)
+      getProductsCustomRows()
+      .then((data: any) => {
+        setProducts(data);
+        
 
-          setProducts(result);
-        } catch (error: any) {
-          new NovaNotification(error.message, "colored").errorNotification();
-        }
+        console.log(data)
       })
-
 
   }, []);
 
@@ -60,7 +58,9 @@ const Products = () => {
           <NovaButton
             type='button'
             buttonText='Add'
+            onClick={() =>     changeFamiliarTitle("Add Products", "product-modal")}
             dataTarget='#product-modal'
+            className='bg-dark'
           />
         </div>
         <div className="card-body">
@@ -74,22 +74,17 @@ const Products = () => {
               },
               {
                 name: 'Category',
-                selector: (row: any) => row.category,
+                selector: (row: any) => row.categoryName,
                 sortable: true,
               },
-            ]}
-            data={[
+
               {
-                id: 1,
-                name: 'Beetlejuice',
-                category: 'Car',
-              },
-              {
-                id: 2,
-                name: 'Ghostbusters',
-                category: '19aFsa84',
+                name: 'Action',
+                selector: (row: any) => row.action,
+                sortable: false,
               },
             ]}
+            data={products}
           />
         </div>
       </div>
@@ -102,10 +97,11 @@ const Products = () => {
         >
 
           <input
-            id={"productid"}
+            id={"id"}
             autoComplete="off"
             type="hidden"
-            name='productid'
+            className='form-control'
+            name='id'
           />
 
           <div className="mb-2">
@@ -143,11 +139,11 @@ const Products = () => {
 
 
               <select
-                id={"category"}
+                id={"categoryid"}
                 autoComplete="off"
                 onKeyUp={checkCorrectValidation}
                 onBlur={checkCorrectValidation}
-                name='category'
+                name='categoryid'
                 className={` form-control`}
               >
                 <option value="">Seleccione</option>
@@ -170,7 +166,7 @@ const Products = () => {
 
             type='submit'
             buttonText='Guardar'
-            className='btn col-12'
+            className='btn bg-dark col-12'
           />
         </form>
 
