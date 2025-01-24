@@ -6,6 +6,7 @@ export type NovaButtonProps = {
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   style?: React.CSSProperties;
   dataTarget?: string;
+  dataDismiss?: string;
   disabled?: boolean;
   form?: string;
   datasets?: Record<string, any>;
@@ -21,6 +22,7 @@ export const NovaButton = ({
   onClick = () => {},
   style = {},
   dataTarget = undefined,
+  dataDismiss = undefined,
   disabled = false,
   form = '',
   datasets = {},
@@ -40,7 +42,7 @@ export const NovaButton = ({
       style={style}
       data-bs-toggle={dataTarget != null ? "modal" : ""}
       data-bs-target={dataTarget}
-    //   data-bs-dismiss={dataTarget != null ? "modal" : ""}
+      data-bs-dismiss={dataDismiss != null ? "modal" : ""}
       disabled={disabled}
       type={type}
       form={form}

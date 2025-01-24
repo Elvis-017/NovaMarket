@@ -29,13 +29,13 @@ export default class BaseUrl {
               "Content-Type": "application/json",
               // "Authorization": `Bearer ${getCookieByName("token")}` 
             },
-            params: { ...params },
+            data: { ...params },
           });
     
           return response;
         } catch (error: any) {
           if (axios.isAxiosError(error)) {
-            return error.message;
+             return Promise.reject(error.response?.data);
           }
         }
       }

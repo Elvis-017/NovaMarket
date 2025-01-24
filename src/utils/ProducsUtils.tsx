@@ -5,7 +5,64 @@ import NovaNotification from "./NovaNotification";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 import { changeFamiliarTitle } from "./ModalUtils";
-import { getShownRowData } from "./DataTable";
+import { getShownRowData } from "./DataTableUtils";
+import { FormEvent } from "react";
+import { GlobalMessages } from "../enums/GlobalMessages";
+
+export const saveProducts = async (callback: any = () => { }) => {
+    const initialData: any = {};
+
+    const form: any = window.document.getElementById("form-product"),
+        saveBtn: any = document.getElementById("btn-save-product"),
+        formData = new FormData(form, saveBtn);
+
+    for (const [key, value] of formData) {
+        // console.log(key, value)
+        let val: any = value;
+        if (val == "") continue;
+        initialData[key] = !isNaN(val) ? parseInt(val) : val;
+
+    }
+
+
+    await new BaseUrl().setData(initialData["id"] ? `Products/modifyProduct` : `Products/saveProduct`, initialData)
+        .then(() => {
+            new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification();
+            callback(this);
+        })
+        .catch((error: any) => {
+            new NovaNotification(error.replace("SQL Error:", ""), "colored").errorNotification();
+        })
+
+}
+
+
+export const deleteProduct = (e: FormEvent, callback: any = () => { }) => {
+
+    e.preventDefault();
+
+    const initialData: any = {};
+
+    const form: any = window.document.getElementById("form-remove"),
+        saveBtn: any = document.getElementById("btn-form-remove"),
+        formData = new FormData(form, saveBtn);
+
+    let val: any = formData.get("idremove")?.toString();
+
+    initialData["id"] = !isNaN(val) ? parseInt(val) : val;
+    console.log(initialData)
+
+    new BaseUrl().setData(`Products/removeProduct`, initialData)
+    .then(() => {
+        new NovaNotification(GlobalMessages.SUCCESS, "colored");
+        callback(this);
+    })
+    .catch((error: any) => {
+        new NovaNotification(error.replace("SQL Error:", ""), "colored").errorNotification();
+    })
+
+
+}
 
 export const getProductsCustomRows = async () => {
     return await new BaseUrl().getData("Products/getProducts")
@@ -22,6 +79,8 @@ export const getProductsCustomRows = async () => {
                         name: obj.name,
                         categoryid: obj.categoryId,
                         categoryname: obj.categoryName,
+
+                        idremove: obj.id,
                     }
 
                     rows.push({
@@ -34,22 +93,26 @@ export const getProductsCustomRows = async () => {
                                     name: props.name,
                                     categoryid: props.categoryid,
                                 }}
-                                onClick={(e: any)=>{
-                                    getShownRowData(e); 
+                                onClick={(e: any) => {
+                                    getShownRowData(e, "btn-warning");
                                     changeFamiliarTitle("Edit Products", "product-modal");
                                 }
                                 }
                                 type="button"
                                 dataTarget={"#product-modal"}
-                                className={`btn btn-warning m-1 btn-sm`}
+                                className={` btn-warning m-1 btn-sm`}
                                 icon={<MdEdit />}
                             />
                             <NovaButton
                                 type="button"
                                 datasets={{
-                                    id: props.id
+                                    idremove: props.id
                                 }}
-                                className={`btn btn-danger m-1 btn-sm`}
+                                onClick={(e: any) => {
+                                    getShownRowData(e, "btn-danger");
+                                }}
+                                dataTarget="#modal-remove"
+                                className={`btn-danger m-1 btn-sm`}
                                 icon={<MdDelete />}
                             />
                         </div>
