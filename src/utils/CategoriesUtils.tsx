@@ -7,7 +7,6 @@ import { changeFamiliarTitle } from "./ModalUtils";
 import { getShownRowData } from "./DataTableUtils";
 import { categoriesMD } from "../interfaces/categoriesMD";
 import { FormEvent } from "react";
-import { disableSubmitBtn } from "./FormUtilis";
 import { GlobalMessages } from "../enums/GlobalMessages";
 
 
@@ -19,20 +18,15 @@ export const saveCategories = async (callback: any = () => { }) => {
         formData = new FormData(form, saveBtn);
 
     for (const [key, value] of formData) {
-        console.log(key, value)
         let val: any = value;
         if (val == "") continue;
         initialData[key] = !isNaN(val) ? parseInt(val) : val;
         // console.log(key, value)
     }
-    console.log(initialData)
 
-
-    disableSubmitBtn("btn-save-category", true);
-    await new BaseUrl().setData(initialData["id"] ? `Category/modifyCategory` : `Category/saveCategory`, initialData)
+    await new BaseUrl().setData(initialData["id"] ? `Categories/modifyCategory` : `Categories/saveCategory`, initialData)
         .then(() => {
-            disableSubmitBtn("btn-save-category", false);
-            new NovaNotification(GlobalMessages.SUCCESS, "colored");
+            new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification;
             callback(this);
         })
         .catch((error: any) => {
@@ -42,7 +36,7 @@ export const saveCategories = async (callback: any = () => { }) => {
 
 }
 
-export const deleteCategory = async (e: FormEvent, callback: any = () => { }) => {
+export const deleteCategory =  (e: FormEvent, callback: any = () => { }) => {
 
     e.preventDefault();
 
@@ -56,19 +50,10 @@ export const deleteCategory = async (e: FormEvent, callback: any = () => { }) =>
     let val: any = formData.get("idremovecategory")?.toString();
 
     initialData["id"] = !isNaN(val) ? parseInt(val) : val;
-  
-    // for (const [key, value] of formData) {
-    //     let val: any = value;
-    //     if (val == "") continue;
-    //     if(key == "idremove") key = "id";
-    //     initialData[key] = !isNaN(val) ? parseInt(val) : val;
-    //     // console.log(key, value)
-    // }
 
-
-   await new BaseUrl().setData(`Category/removeCategory`, initialData)
+    new BaseUrl().setData(`Categories/removeCategory`, initialData)
         .then(() => {
-            new NovaNotification(GlobalMessages.SUCCESS, "colored");
+            new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification();
             callback(this);
         })
         .catch((error: any) => {
@@ -81,7 +66,6 @@ export const getCategoriesCustomRows = async () => {
     return await new BaseUrl().getData("Categories/getCategories")
         .then((responds: any) => {
 
-            try {
                 let stringy = JSON.stringify(responds),
                     data = JSON.parse(stringy),
                     rows: Array<any> = [];
@@ -129,8 +113,8 @@ export const getCategoriesCustomRows = async () => {
 
                 return rows
 
-            } catch (error: any) {
-                new NovaNotification(error.message, "colored").errorNotification();
-            }
-        });
+        })
+        .catch((error: any) => {
+            new NovaNotification(error.replace("SQL Error:", ""), "colored").errorNotification();
+        })
 }

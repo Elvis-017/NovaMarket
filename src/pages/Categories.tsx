@@ -20,7 +20,7 @@ export const Categories = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
 
-  const [categories, setCategories] = useState<Array<categoriesMD>>([]);
+  const [categories, setCategories] = useState<any>([]);
 
   useEffect(() => {
 
@@ -39,7 +39,6 @@ export const Categories = () => {
 
     setLoading(true);
     disableSubmitBtn("btn-save-category", true);
-
     saveCategories(() => {
       getCategoriesCustomRows()
         .then((data: any) => {
@@ -106,10 +105,19 @@ export const Categories = () => {
             method='post'
             id="form-remove-category"
             onSubmit={(e: FormEvent) => {
+              setLoading(true);
               deleteCategory(e, () => {
+                getCategoriesCustomRows()
+                  .then((data: any) => {
+                    setCategories(data);
+                  })
+                  .then(() => {
 
-
+                    hideModal("modal-remove-category");
+                  })
               })
+              setLoading(false)
+
             }}
           >
 
@@ -137,7 +145,7 @@ export const Categories = () => {
             id={"id"}
             autoComplete="off"
             type="hidden"
-            className='form-control'
+            className='form-control-id'
             name='id'
           />
 

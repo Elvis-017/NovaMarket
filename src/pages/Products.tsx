@@ -26,19 +26,24 @@ const Products = () => {
   const [categories, setCategories] = useState<Array<categoriesMD>>([]);
   const [products, setProducts] = useState<Array<productsMD>>([]);
 
-  useEffect(() => {
 
+  const fetchCategories = async () => {
     new BaseUrl().getData("Categories/getCategories")
       .then((responds: categoriesMD) => {
-        try {
-          const stringy = JSON.stringify(responds);
-          const result = JSON.parse(stringy)
+        const stringy = JSON.stringify(responds);
+        const result = JSON.parse(stringy)
 
-          setCategories(result);
-        } catch (error: any) {
-          new NovaNotification(error.message, "colored").errorNotification();
-        }
+        setCategories(result);
+
       })
+      .catch((error: any) => {
+        new NovaNotification(error, "colored").errorNotification();
+      })
+  }
+
+  useEffect(() => {
+
+    fetchCategories();
 
     setLoading(true);
     getProductsCustomRows()
@@ -49,24 +54,26 @@ const Products = () => {
 
   }, []);
 
-  const submittion = (e: FormEvent) => {
+  const submittion = async (e: FormEvent) => {
     e.preventDefault();
 
     if (checkRequiredField()) return;
 
     setLoading(true);
-    disableSubmitBtn("btn-save-product", true);
-    saveProducts(() => {
-      getProductsCustomRows()
-        .then((data: any) => {
-          setProducts(data);
-        })
-        .then(() => {
-          hideModal("product-modal");
-        })
+    // setTimeout(() => {
+      disableSubmitBtn("btn-save-product", true);
+      saveProducts(() => {
+        getProductsCustomRows()
+          .then((data: any) => {
+            setProducts(data);
+          })
+          .then(() => {
+            hideModal("product-modal");
+          })
       })
       disableSubmitBtn("btn-save-product", false);
       setLoading(false)
+    // }, 500);
 
   }
 
@@ -130,7 +137,20 @@ const Products = () => {
             action=""
             method='post'
             id="form-remove"
-            onSubmit={(e: FormEvent) => { deleteProduct(e) }}
+            onSubmit={(e: FormEvent) => {
+              setLoading(true);
+              deleteProduct(e, () => {
+                getProductsCustomRows()
+                  .then((data: any) => {
+                    setProducts(data);
+                  })
+                  .then(() => {
+            
+                    hideModal("modal-remove");
+                  })
+              })
+              setLoading(false)
+            }}
           >
 
             <input

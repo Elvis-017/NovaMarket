@@ -1,5 +1,3 @@
-import { Modal } from 'bootstrap'
-
 export type ModalProps = {
     title?: string,
     modalBody?: JSX.Element,

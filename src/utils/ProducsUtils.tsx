@@ -17,13 +17,11 @@ export const saveProducts = async (callback: any = () => { }) => {
         formData = new FormData(form, saveBtn);
 
     for (const [key, value] of formData) {
-        // console.log(key, value)
         let val: any = value;
         if (val == "") continue;
         initialData[key] = !isNaN(val) ? parseInt(val) : val;
 
     }
-
 
     await new BaseUrl().setData(initialData["id"] ? `Products/modifyProduct` : `Products/saveProduct`, initialData)
         .then(() => {
@@ -50,11 +48,10 @@ export const deleteProduct = (e: FormEvent, callback: any = () => { }) => {
     let val: any = formData.get("idremove")?.toString();
 
     initialData["id"] = !isNaN(val) ? parseInt(val) : val;
-    console.log(initialData)
-
+ 
     new BaseUrl().setData(`Products/removeProduct`, initialData)
     .then(() => {
-        new NovaNotification(GlobalMessages.SUCCESS, "colored");
+        new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification();
         callback(this);
     })
     .catch((error: any) => {
@@ -67,8 +64,6 @@ export const deleteProduct = (e: FormEvent, callback: any = () => { }) => {
 export const getProductsCustomRows = async () => {
     return await new BaseUrl().getData("Products/getProducts")
         .then((responds: any) => {
-
-            try {
                 let stringy = JSON.stringify(responds),
                     data = JSON.parse(stringy),
                     rows: Array<any> = [];
@@ -122,8 +117,9 @@ export const getProductsCustomRows = async () => {
 
                 return rows
 
-            } catch (error: any) {
-                new NovaNotification(error.message, "colored").errorNotification();
-            }
-        });
+      
+        })
+        .catch((error: any) => {
+            new NovaNotification(error.replace("SQL Error:", ""), "colored").errorNotification();
+        })
 }

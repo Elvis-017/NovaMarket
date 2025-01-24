@@ -15,7 +15,7 @@ export default class BaseUrl {
         return data;
       } catch (error: any) {
         if (axios.isAxiosError(error)) {
-          return error.message;
+          return Promise.reject(error.response?.data);
         }
       }
     }
