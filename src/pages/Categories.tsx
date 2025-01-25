@@ -2,12 +2,13 @@ import { FormEvent, useEffect, useState } from 'react'
 import { NovaButton } from '../components/NovaButton'
 import { NovaModal } from '../components/NovaModal'
 import { checkCorrectValidation, checkRequiredField, cleanFields, disableSubmitBtn } from '../utils/FormUtilis'
-import { categoriesMD } from '../interfaces/categoriesMD'
+// import { categoriesMD } from '../interfaces/categoriesMD'
 import DataTable from 'react-data-table-component'
 import { changeFamiliarTitle, hideModal } from '../utils/ModalUtils'
 import { deleteCategory, getCategoriesCustomRows, saveCategories } from '../utils/CategoriesUtils'
 import { ConfirmNovaModal } from '../components/ConfirmNovaModal'
 import { LoadingSpinner } from '../components/LoadingSpinner'
+import { IoMdAdd } from 'react-icons/io'
 
 export const Categories = () => {
 
@@ -17,42 +18,89 @@ export const Categories = () => {
   MODAL?.addEventListener("hide.bs.modal", (_) => cleanFields());
   MODAL_REMOVE?.addEventListener("hide.bs.modal", (_) => cleanFields());
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [state, setState] = useState({
+    loading: false,
+    categories: [] as Array<any>,
 
+  });
 
-  const [categories, setCategories] = useState<any>([]);
 
   useEffect(() => {
+    setState((prevState) => ({
+      ...prevState,
+      loading: true,
+    }));
 
     getCategoriesCustomRows()
       .then((data: any) => {
-        setCategories(data);
-
+        setState((prevState) => ({
+          ...prevState,
+          categories: data,
+        }))
+      
       })
+      .finally(() =>
+        {
+          setState((prevState) => ({
+            ...prevState,
+            loading: false,
+          }));
+        })
 
   }, []);
 
 
-  const submittion = (e: FormEvent) => {
+  const submittion = async (e: FormEvent) => {
     e.preventDefault();
+
     if (checkRequiredField()) return;
 
-    setLoading(true);
+    setState((prevState) => ({
+      ...prevState,
+      loading: true,
+    }));
+
     disableSubmitBtn("btn-save-category", true);
-    saveCategories(() => {
-      getCategoriesCustomRows()
-        .then((data: any) => {
-          setCategories(data);
-        })
-        .then(() => {
-          hideModal("category-modal");
-        })
-    });
-    disableSubmitBtn("btn-save-category", false);
-    setLoading(false)
+
+      await saveCategories(e)
+      .then(async()=>{
+        const updatedProducts = await getCategoriesCustomRows();
+
+        setState({
+          loading: false,
+          categories: updatedProducts,
+        });
+  
+        hideModal("category-modal");
+      })
+
+      disableSubmitBtn("btn-save-category", false);
+
   }
 
+  
+    const deletion = async (e: FormEvent) => {
+      e.preventDefault();
+  
+      setState((prevState) => ({
+        ...prevState,
+        loading: true,
+      }));
+  
+        await deleteCategory(e)
+        .then(async () => {
+          const updatedProducts = await getCategoriesCustomRows();
+  
+          setState({
+            loading: false,
+            categories: updatedProducts,
+          });
 
+          hideModal("modal-remove-category");
+        })
+      }
+  
+  
   return (
     <>
       <div className="card">
@@ -63,13 +111,14 @@ export const Categories = () => {
             type='button'
             buttonText='Add'
             onClick={() => changeFamiliarTitle("Add Category", "category-modal")}
+            icon={<IoMdAdd />}
             dataTarget='#category-modal'
             className='bg-dark'
           />
         </div>
         <div className="card-body">
 
-          {loading
+          {state.loading
             ?
             <LoadingSpinner />
             :
@@ -78,9 +127,16 @@ export const Categories = () => {
               pagination
               columns={[
                 {
+                  name: "#",
+                  selector: (_, index?: number) => (index !== undefined ? index + 1 : 0),
+                  sortable: false,
+                  width: "5%",
+                },
+                {
                   name: 'Name',
                   selector: (row: any) => row.name,
                   sortable: true,
+                  width: "80%",
                 },
                 {
                   name: 'Action',
@@ -88,7 +144,7 @@ export const Categories = () => {
                   sortable: false,
                 },
               ]}
-              data={categories}
+              data={state.categories}
             />
           }
         </div>
@@ -104,21 +160,7 @@ export const Categories = () => {
             action=""
             method='post'
             id="form-remove-category"
-            onSubmit={(e: FormEvent) => {
-              setLoading(true);
-              deleteCategory(e, () => {
-                getCategoriesCustomRows()
-                  .then((data: any) => {
-                    setCategories(data);
-                  })
-                  .then(() => {
-
-                    hideModal("modal-remove-category");
-                  })
-              })
-              setLoading(false)
-
-            }}
+            onSubmit={deletion}
           >
 
             <input
@@ -128,8 +170,6 @@ export const Categories = () => {
               className='form-control-id'
               name='idremovecategory'
             />
-
-
 
           </form>
         } />

@@ -10,7 +10,9 @@ import { FormEvent } from "react";
 import { GlobalMessages } from "../enums/GlobalMessages";
 
 
-export const saveCategories = async (callback: any = () => { }) => {
+export const saveCategories = async (e: FormEvent) => {
+    e.preventDefault();
+
     const initialData: any = {};
 
     const form: any = window.document.getElementById("form-category"),
@@ -21,22 +23,19 @@ export const saveCategories = async (callback: any = () => { }) => {
         let val: any = value;
         if (val == "") continue;
         initialData[key] = !isNaN(val) ? parseInt(val) : val;
-        // console.log(key, value)
     }
 
-    await new BaseUrl().setData(initialData["id"] ? `Categories/modifyCategory` : `Categories/saveCategory`, initialData)
-        .then(() => {
-            new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification;
-            callback(this);
-        })
-        .catch((error: any) => {
-            new NovaNotification(error.replace("SQL Error:", ""), "colored").errorNotification();
-        })
-
+   return await new BaseUrl().setData(initialData["id"] ? `Categories/modifyCategory` : `Categories/saveCategory`, initialData)
+    .then(() => {
+        new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification();
+    })
+    .catch((error: any) => {
+         new NovaNotification(error, "colored").errorNotification();
+    })
 
 }
 
-export const deleteCategory =  (e: FormEvent, callback: any = () => { }) => {
+export const deleteCategory =  (e: FormEvent) => {
 
     e.preventDefault();
 
@@ -51,18 +50,17 @@ export const deleteCategory =  (e: FormEvent, callback: any = () => { }) => {
 
     initialData["id"] = !isNaN(val) ? parseInt(val) : val;
 
-    new BaseUrl().setData(`Categories/removeCategory`, initialData)
-        .then(() => {
-            new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification();
-            callback(this);
-        })
-        .catch((error: any) => {
-            new NovaNotification(error.replace("SQL Error:", ""), "colored").errorNotification();
-        })
+  return  new BaseUrl().setData(`Categories/removeCategory`, initialData)
+    .then(() => {
+        new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification();
+    })
+    .catch((error: any) => {
+        new NovaNotification(error, "colored").errorNotification();
+    })
 
 }
 
-export const getCategoriesCustomRows = async () => {
+export const getCategoriesCustomRows = async (): Promise<void | any | Array<any>> => {
     return await new BaseUrl().getData("Categories/getCategories")
         .then((responds: any) => {
 

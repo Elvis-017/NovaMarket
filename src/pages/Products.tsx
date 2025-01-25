@@ -1,11 +1,10 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { NovaButton } from '../components/NovaButton'
 import { NovaModal } from '../components/NovaModal'
 import { checkCorrectValidation, checkRequiredField, cleanFields, disableSubmitBtn } from '../utils/FormUtilis'
 import BaseUrl from '../utils/BaseURL'
 import { categoriesMD } from '../interfaces/categoriesMD'
 import NovaNotification from '../utils/NovaNotification'
-import { productsMD } from '../interfaces/productsMD'
 import DataTable from 'react-data-table-component'
 import { deleteProduct, getProductsCustomRows, saveProducts } from '../utils/ProducsUtils'
 import { changeFamiliarTitle, hideModal } from '../utils/ModalUtils'
@@ -21,11 +20,13 @@ const Products = () => {
   MODAL?.addEventListener("hide.bs.modal", (_) => cleanFields());
   MODAL_REMOVE?.addEventListener("hide.bs.modal", (_) => cleanFields());
 
-  const [loading, setLoading] = useState<boolean>(false);
-
   const [categories, setCategories] = useState<Array<categoriesMD>>([]);
-  const [products, setProducts] = useState<Array<productsMD>>([]);
 
+  const [state, setState] = useState({
+    loading: false,
+    products: [] as Array<any>,
+
+  });
 
   const fetchCategories = async () => {
     new BaseUrl().getData("Categories/getCategories")
@@ -45,12 +46,25 @@ const Products = () => {
 
     fetchCategories();
 
-    setLoading(true);
+    setState((prevState) => ({
+      ...prevState,
+      loading: true,
+    }));
+
     getProductsCustomRows()
       .then((data: any) => {
-        setProducts(data);
+        setState((prevState) => ({
+          ...prevState,
+          products: data,
+        }));
       })
-      .finally(() => setLoading(false))
+      .finally(() =>
+      {
+        setState((prevState) => ({
+          ...prevState,
+          loading: false,
+        }));
+      })
 
   }, []);
 
@@ -59,24 +73,52 @@ const Products = () => {
 
     if (checkRequiredField()) return;
 
-    setLoading(true);
-    // setTimeout(() => {
+    setState((prevState) => ({
+      ...prevState,
+      loading: true,
+    }));
+
       disableSubmitBtn("btn-save-product", true);
-      saveProducts(() => {
-        getProductsCustomRows()
-          .then((data: any) => {
-            setProducts(data);
-          })
-          .then(() => {
-            hideModal("product-modal");
-          })
+
+      await saveProducts(e)
+      .then(async()=>{
+        const updatedProducts = await getProductsCustomRows();
+
+        setState({
+          loading: false,
+          products: updatedProducts,
+        });
+  
+        hideModal("product-modal");
       })
-      disableSubmitBtn("btn-save-product", false);
-      setLoading(false)
-    // }, 500);
+
+    disableSubmitBtn("btn-save-product", false);
 
   }
 
+  const deletion = async (e: FormEvent) => {
+    e.preventDefault();
+
+    setState((prevState) => ({
+      ...prevState,
+      loading: true,
+    }));
+
+      await deleteProduct(e)
+      .then(async () => {
+        const updatedProducts = await getProductsCustomRows();
+
+        setState({
+          loading: false,
+          products: updatedProducts,
+        });
+
+        hideModal("modal-remove");
+      })
+
+
+
+  }
 
   return (
     <>
@@ -95,7 +137,7 @@ const Products = () => {
         </div>
         <div className="card-body">
 
-          {loading
+          {state.loading
             ?
             <LoadingSpinner />
             :
@@ -104,14 +146,23 @@ const Products = () => {
               pagination
               columns={[
                 {
+                  name: "#",
+                  selector: (_, index?: number) => (index !== undefined ? index + 1 : 0),
+                  sortable: false,
+                  width: "5%",
+                }
+                ,
+                {
                   name: 'Name',
                   selector: (row: any) => row.name,
                   sortable: true,
+                  width: "40%",
                 },
                 {
                   name: 'Category',
                   selector: (row: any) => row.categoryName,
                   sortable: true,
+                  width: "40%",
                 },
 
                 {
@@ -120,7 +171,7 @@ const Products = () => {
                   sortable: false,
                 },
               ]}
-              data={products}
+              data={state.products}
             />
 
           }
@@ -137,20 +188,7 @@ const Products = () => {
             action=""
             method='post'
             id="form-remove"
-            onSubmit={(e: FormEvent) => {
-              setLoading(true);
-              deleteProduct(e, () => {
-                getProductsCustomRows()
-                  .then((data: any) => {
-                    setProducts(data);
-                  })
-                  .then(() => {
-            
-                    hideModal("modal-remove");
-                  })
-              })
-              setLoading(false)
-            }}
+            onSubmit={deletion}
           >
 
             <input

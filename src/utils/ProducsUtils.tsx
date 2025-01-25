@@ -9,7 +9,10 @@ import { getShownRowData } from "./DataTableUtils";
 import { FormEvent } from "react";
 import { GlobalMessages } from "../enums/GlobalMessages";
 
-export const saveProducts = async (callback: any = () => { }) => {
+export const saveProducts = async (e: FormEvent) => {
+
+    e.preventDefault();
+
     const initialData: any = {};
 
     const form: any = window.document.getElementById("form-product"),
@@ -23,19 +26,18 @@ export const saveProducts = async (callback: any = () => { }) => {
 
     }
 
-    await new BaseUrl().setData(initialData["id"] ? `Products/modifyProduct` : `Products/saveProduct`, initialData)
+   return await new BaseUrl().setData(initialData["id"] ? `Products/modifyProduct` : `Products/saveProduct`, initialData)
         .then(() => {
             new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification();
-            callback(this);
         })
         .catch((error: any) => {
-            new NovaNotification(error.replace("SQL Error:", ""), "colored").errorNotification();
+            new NovaNotification(error, "colored").errorNotification();
         })
 
 }
 
 
-export const deleteProduct = (e: FormEvent, callback: any = () => { }) => {
+export const deleteProduct = (e: FormEvent) => {
 
     e.preventDefault();
 
@@ -49,19 +51,19 @@ export const deleteProduct = (e: FormEvent, callback: any = () => { }) => {
 
     initialData["id"] = !isNaN(val) ? parseInt(val) : val;
  
-    new BaseUrl().setData(`Products/removeProduct`, initialData)
+  return  new BaseUrl().setData(`Products/removeProduct`, initialData)
     .then(() => {
         new NovaNotification(GlobalMessages.SUCCESS, "colored").successNotification();
-        callback(this);
+
     })
     .catch((error: any) => {
-        new NovaNotification(error.replace("SQL Error:", ""), "colored").errorNotification();
+        new NovaNotification(error, "colored").errorNotification();
     })
 
 
 }
 
-export const getProductsCustomRows = async () => {
+export const getProductsCustomRows = async (): Promise<void | any | Array<any>> => {
     return await new BaseUrl().getData("Products/getProducts")
         .then((responds: any) => {
                 let stringy = JSON.stringify(responds),
